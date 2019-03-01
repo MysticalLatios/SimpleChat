@@ -2,6 +2,7 @@ package com.example.simplechat;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,38 +59,24 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
 
     @Override
-
     public void onBindViewHolder(ViewHolder holder, int position) {
-
         Message message = mMessages.get(position);
 
-        final boolean isMe = message.getUserId() != null && message.getUserId().equals(mUserId);
-
-
+        final boolean isMe = message.getUserId().equals(mUserId);
 
         if (isMe) {
-
             holder.imageMe.setVisibility(View.VISIBLE);
-
-            holder.imageOther.setVisibility(View.GONE);
-
-            holder.body.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
-
-        } else {
-
-            holder.imageOther.setVisibility(View.VISIBLE);
-
-            holder.imageMe.setVisibility(View.GONE);
-
-            holder.body.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+            //holder.imageOther.setVisibility(View.GONE);
+            Glide.with(mContext).load(getProfileUrl(message.getUserId())).into(holder.imageMe);
+            Log.d("pic", "Binding image to me");
 
         }
-
-
-
-        final ImageView profileView = isMe ? holder.imageMe : holder.imageOther;
-
-        Glide.with(mContext).load(getProfileUrl(message.getUserId())).into(profileView);
+        else if(!isMe) {
+            holder.imageOther.setVisibility(View.VISIBLE);
+            //holder.imageMe.setVisibility(View.GONE);
+            Glide.with(mContext).load(getProfileUrl(message.getUserId())).into(holder.imageOther);
+            Log.d("pic", "Binding image to other");
+        }
 
         holder.body.setText(message.getBody());
 
@@ -104,21 +91,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         String hex = "";
 
         try {
-
             final MessageDigest digest = MessageDigest.getInstance("MD5");
-
             final byte[] hash = digest.digest(userId.getBytes());
-
             final BigInteger bigInt = new BigInteger(hash);
-
             hex = bigInt.abs().toString(16);
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
         }
-
+        Log.d("pic", "http://www.gravatar.com/avatar/" + hex + "?d=identicon");
         return "http://www.gravatar.com/avatar/" + hex + "?d=identicon";
 
     }
@@ -151,7 +132,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             imageOther = (ImageView)itemView.findViewById(R.id.ivProfileOther);
 
-            imageMe = (ImageView)itemView.findViewById(R.id.ivProfileMe);
+            imageMe = (ImageView)itemView.findViewById(R.id.ivProfileOther);
 
             body = (TextView)itemView.findViewById(R.id.tvBody);
 
